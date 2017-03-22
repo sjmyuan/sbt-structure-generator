@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+project_folder=$1
+
+#create source folders
+mkdir -p ${project_folder}/src/{main,test}/{java,resources,scala}
+mkdir -p ${project_folder}/{lib,project,target}
+
+#create simple sbt config file 
+cat << EOF > ${project_folder}/build.sbt
+name := baseDirectory.value.getName
+version := "1.0-SNAPSHOT"
+scalaVersion := "2.11.2"
+
+val scalazVersion = "7.1.0"
+
+libraryDependencies ++= Seq(
+  "org.scalaz" %% "scalaz-core" % scalazVersion,
+  "org.scalaz" %% "scalaz-effect" % scalazVersion,
+  "org.scalaz" %% "scalaz-typelevel" % scalazVersion,
+  "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
+)
+
+scalacOptions += "-feature"
+
+initialCommands in console := "import scalaz._, Scalaz._"
+EOF
+
+cat << EOF > ${project_folder}/project/plugins.sbt
+resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.7.0-SNAPSHOT")
+
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.2")
+
+addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.5")
+EOF
+
